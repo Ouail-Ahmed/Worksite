@@ -123,8 +123,10 @@
                     <td class="px-6 py-4 whitespace-nowrap text-center text-sm text-gray-500">
                         @if($task->finished_date)
                             <span class="text-green-600 font-medium">{{ \Carbon\Carbon::parse($task->finished_date)->format('d/m/Y') }}</span>
-                        @else
+                        @elseif($task->total_achieved > 0)
                             <span class="text-orange-500">En cours</span>
+                        @else
+                            <span class="text-gray-500">Non commencée</span>
                         @endif
                     </td>
                     
