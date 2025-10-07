@@ -50,17 +50,8 @@
             <span class="ml-3">Unités & Projets</span>
         </a>
         
-        {{-- Separate Projects Link (Useful for a full list if needed) --}}
-        {{--
-        <a href="#" 
-           class="flex items-center py-2.5 px-6 transition duration-200 hover:bg-gray-700">
-            <i class="fas fa-tasks w-5"></i>
-            <span class="ml-3">Tous les Projets</span>
-        </a>
-        --}}
     </nav>
 
-    {{-- Logout Link (Fixed to the bottom if possible, or placed in the header/main nav) --}}
     <div class="mt-8 pt-4 border-t border-gray-700 mx-4">
         <form action="{{ route('logout') }}" method="POST">
             @csrf

@@ -23,10 +23,10 @@ class DashboardController extends Controller
         $user = Auth::user();
 
         // 1. Director Redirection
-        if ($user->role === 'directeur') {
-            // Directors must be redirected to their specific dashboard route
-            return redirect()->route('dashboard.director');
-        }
+        // if ($user->role === 'directeur') {
+        //     // Directors must be redirected to their specific dashboard route
+        //     return redirect()->route('dashboard.director');
+        // }
 
         // --- 2. Agent Dashboard Logic ---
 

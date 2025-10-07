@@ -3,7 +3,7 @@
 @section('title', 'Détails du Projet : ' . $project->name)
 
 @push('styles')
-    <link href="{{ asset('css/styles.css') }}" rel="stylesheet">
+    <script src="{{ asset('js/tailwind-cdn.js') }}"></script>
 @endpush
 
 @section('content')
