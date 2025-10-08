@@ -54,6 +54,8 @@ Route::middleware('auth')->group(function () {
     */
     Route::resource('units', UnitController::class);
 
+    Route::delete('/units/{unit}', [UnitController::class, 'destroy'])->name('units.destroy');
+
     // List of Projects for a specific Unit
     Route::get('/units/{unit}/projects', [ProjectController::class, 'indexUnitProjects'])->name('units.projects');
 
@@ -61,6 +63,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/projects', [ProjectController::class, 'store'])->name('projects.store');
     Route::get('/projects/{project}', [DashboardController::class, 'showProject'])->name('projects.show');
     Route::post('/projects/{project}/tasks', [TaskController::class, 'store'])->name('projects.tasks.store');
+    Route::delete('/projects/{project}', [ProjectController::class, 'destroy'])->name('projects.destroy');
 
     // Task Report Progress (if handled via a standard web form submission)
     Route::put('/tasks/{task}/report-progress', [TaskController::class, 'reportProgress'])->name('tasks.report_progress');

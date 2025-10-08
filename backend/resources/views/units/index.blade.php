@@ -35,10 +35,20 @@
             {{-- Existing Units Grid --}}
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                 @foreach ($units as $unit)
-                    <a href="{{ route('units.projects', $unit) }}" class="block">
-                        <div class="bg-white rounded-xl shadow-lg hover:shadow-2xl transition duration-300 transform hover:scale-[1.01] p-6 border-b-4 border-blue-500 flex flex-col h-full">
-                            
-                            <h2 class="text-2xl font-bold text-blue-600 mb-2 truncate">
+                    <div class="bg-white rounded-xl shadow-lg hover:shadow-2xl transition duration-300 p-6 border-b-4 border-blue-500 flex flex-col h-full relative">
+                        {{-- Delete Button (Only for Directeur) --}}
+                        @if (Auth::user()->role === 'directeur')
+                            <form action="{{ route('units.destroy', $unit->id) }}" method="POST" class="absolute top-4 right-4" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cette unité ?');">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="text-red-500 hover:text-red-700 transition">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
+                            </form>
+                        @endif
+
+                        <a href="{{ route('units.projects', $unit) }}" class="flex flex-col h-full">
+                            <h2 class="text-2xl font-bold text-blue-600 mb-2 truncate pr-8">
                                 {{ $unit->name }}
                             </h2>
                             
@@ -51,8 +61,8 @@
                                     Consulter les projets <i class="fas fa-arrow-right ml-1"></i>
                                 </span>
                             </div>
-                        </div>
-                    </a>
+                        </a>
+                    </div>
                 @endforeach
             </div>
         @endif

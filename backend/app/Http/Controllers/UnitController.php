@@ -84,4 +84,36 @@ class UnitController extends Controller
 
         return response()->json($units);
     }
+    /**
+     * Remove the specified unit from storage.
+     * Route: DELETE /units/{unit} -> name('units.destroy')
+     *
+     * @param  \App\Models\Unit  $unit
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function destroy(Unit $unit)
+    {
+        // 1. Authorization: Only 'directeur' can delete units.
+        if (Auth::user()->role !== 'directeur') {
+            abort(403, 'Unauthorized action. Only Directors can delete units.');
+        }
+
+        // 2. Check if unit has associated projects
+        if ($unit->projects()->count() > 0) {
+            return redirect()->route('units.index')
+                ->with('error', 'Impossible de supprimer l\'unité "' . $unit->name . '" car elle contient des projets.');
+        }
+
+        // 3. Delete the unit
+        try {
+            $unitName = $unit->name;
+            $unit->delete();
+
+            return redirect()->route('units.index')
+                ->with('success', 'L\'unité "' . $unitName . '" a été supprimée avec succès.');
+        } catch (\Exception $e) {
+            return redirect()->route('units.index')
+                ->with('error', 'Erreur lors de la suppression de l\'unité. Veuillez réessayer.');
+        }
+    }
 }

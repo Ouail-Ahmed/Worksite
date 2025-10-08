@@ -8,7 +8,6 @@
             Synthèse Globale de l'Activité
         </h1>
 
-        <!-- Global Metric Cards (Data from $stats) -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
             
             <div class="bg-white p-6 rounded-xl shadow-lg border-l-4 border-blue-500 hover:shadow-xl transition duration-300">
@@ -33,11 +32,10 @@
             </div>
         </div>
 
-        <!-- Global Progress Bar (Data from $globalProgress) -->
-        {{-- <div class="bg-white p-8 rounded-xl shadow-lg mb-8">
+        <div class="bg-white p-8 rounded-xl shadow-lg mb-8">
             <h2 class="text-2xl font-semibold text-gray-800 mb-4">
                 Avancement Global (Tous Projets Confondus)
-            </h2> --}}
+            </h2>
             
             @php
                 // Ensure $globalProgress is between 0 and 100 and cast to integer
@@ -61,8 +59,19 @@
                 *Ceci représente le rapport entre la quantité totale réalisée et la quantité totale planifiée pour l'ensemble des tâches de tous les projets.
             </p>
         </div>
+        
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-10">
+            <div class="bg-white p-6 rounded-xl shadow-lg">
+                <h3 class="text-xl font-semibold text-gray-800 mb-4">Projets par Unité</h3>
+                <canvas id="projectsBarChart"></canvas>
+            </div>
 
-        <!-- Detailed Unit Performance Table (Looping over $unitsData) -->
+            <div class="bg-white p-6 rounded-xl shadow-lg">
+                <h3 class="text-xl font-semibold text-gray-800 mb-4">Répartition de l'Avancement</h3>
+                <canvas id="progressPieChart"></canvas>
+            </div>
+        </div>
+
         <div class="bg-white p-8 rounded-xl shadow-lg">
             <h2 class="text-2xl font-semibold text-gray-800 mb-6">
                 Performance Détaillée par Unité
@@ -129,3 +138,81 @@
 
     </div>
 @endsection
+
+@push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Bar Chart - Projects per Unit
+        const barCtx = document.getElementById('projectsBarChart').getContext('2d');
+        const projectsBarChart = new Chart(barCtx, {
+            type: 'bar',
+            data: {
+                labels: {!! json_encode($unitsData->pluck('name')) !!},
+                datasets: [{
+                    label: 'Nombre de Projets',
+                    data: {!! json_encode($unitsData->pluck('total_projects_count')) !!},
+                    backgroundColor: 'rgba(59, 130, 246, 0.7)',
+                    borderColor: 'rgba(59, 130, 246, 1)',
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            stepSize: 1
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                }
+            }
+        });
+
+        // Pie Chart - Progress Distribution
+        const pieCtx = document.getElementById('progressPieChart').getContext('2d');
+        const progressPieChart = new Chart(pieCtx, {
+            type: 'doughnut',
+            data: {
+                labels: {!! json_encode($unitsData->pluck('name')) !!},
+                datasets: [{
+                    label: 'Avancement (%)',
+                    data: {!! json_encode($unitsData->pluck('overall_progress_percentage')) !!},
+                    backgroundColor: [
+                        'rgba(59, 130, 246, 0.8)',
+                        'rgba(16, 185, 129, 0.8)',
+                        'rgba(249, 115, 22, 0.8)',
+                        'rgba(239, 68, 68, 0.8)',
+                        'rgba(139, 92, 246, 0.8)',
+                        'rgba(236, 72, 153, 0.8)'
+                    ],
+                    borderColor: 'white',
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                let value = context.parsed || 0;
+                                return context.label + ': ' + value.toFixed(2) + '%';
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    });
+</script>
+@endpush

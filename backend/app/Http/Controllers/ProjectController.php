@@ -110,7 +110,35 @@ class ProjectController extends Controller
             ]
         ]);
     }
+    /**
+     * Remove the specified project from storage.
+     * Route: DELETE /projects/{project}
+     *
+     * @param  \App\Models\Project  $project
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function destroy(Project $project)
+    {
+        // 1. Authorization: Check if the user is an 'agent'
+        // You might want to add more specific authorization logic here,
+        // e.g., using Gates or Policies.
+        if (Auth::user()->role !== 'agent') {
+            abort(403, 'Unauthorized action. Only Agents can delete projects.');
+        }
 
+        // Store details for the redirect message before deleting
+        $unitId = $project->unit_id;
+        $projectName = $project->name;
+
+        // 2. Delete the project
+        // Note: Associated tasks might need to be handled depending on your
+        // database schema (e.g., cascading deletes or manual deletion).
+        $project->delete();
+
+        // 3. Redirect back to the unit's project list with a success message
+        return redirect()->route('units.projects', $unitId)
+            ->with('success', 'Le projet "' . $projectName . '" a été supprimé avec succès.');
+    }
     // The logic for updating individual tasks is usually handled by a separate TaskController.
     // If you prefer to keep it in this file (as in your old setup), you'll need the updateTask method here.
 }

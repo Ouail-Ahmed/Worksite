@@ -22,7 +22,42 @@
                 </button>
             @endif
         </div>
-        
+        {{-- Delete Project Modal (HIDDEN BY DEFAULT) --}}
+        <div id="delete-project-modal" class="fixed inset-0 bg-gray-600 bg-opacity-75 hidden flex items-center justify-center z-50 transition-opacity duration-300">
+            <div class="bg-white rounded-lg shadow-2xl p-6 w-full max-w-md mx-4">
+                <div class="flex justify-between items-center mb-4 border-b pb-2">
+                    <h3 class="text-xl font-bold text-gray-800">Confirmer la suppression</h3>
+                    <button 
+                        onclick="document.getElementById('delete-project-modal').classList.add('hidden')"
+                        class="text-gray-400 hover:text-gray-600 transition"
+                    >
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                
+                <p class="text-gray-600 mb-6">Êtes-vous sûr de vouloir supprimer ce projet ? Cette action est irréversible.</p>
+                
+                <form id="delete-project-form" method="POST" action="">
+                    @csrf
+                    @method('DELETE')
+                    <div class="flex justify-end space-x-3">
+                        <button 
+                            type="button" 
+                            onclick="document.getElementById('delete-project-modal').classList.add('hidden')"
+                            class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition duration-150"
+                        >
+                            Annuler
+                        </button>
+                        <button 
+                            type="submit" 
+                            class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition duration-150 font-medium"
+                        >
+                            Supprimer
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
         <p class="text-gray-600 mb-6 border-b pb-4">
             Liste de tous les projets relevant de cette unité. Cliquez sur un projet pour voir l'avancement détaillé des tâches.
         </p>
@@ -95,40 +130,53 @@
         @else
             {{-- PROJECTS GRID --}}
             <div id="projects-grid" class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                @foreach ($projects as $project)
-                    {{-- Add data attributes for filtering --}}
-                    <a href="{{ route('projects.show', $project) }}" 
-                       class="project-card block" 
-                       data-type="{{ strtolower($project->type ?? '') }}"
-                       data-name="{{ strtolower($project->name) }}"
-                       data-section="{{ strtolower($project->section ?? '') }}"
-                       data-start-date="{{ $project->start_date }}"
-                       data-end-date="{{ $project->end_date }}">
-                        <div class="bg-white p-6 rounded-xl shadow-lg hover:shadow-2xl transition duration-300 transform hover:scale-[1.005] border-l-8 border-gray-400">
-                            
-                            <h2 class="text-xl font-bold text-gray-800 mb-1">
-                                {{ $project->name }}
-                            </h2>
-                            
-                            <p class="text-sm font-medium text-gray-500 mb-3">
-                                <span class="uppercase text-xs tracking-wider bg-indigo-100 text-indigo-800 py-1 px-2 rounded-full">{{ $project->type ?? 'Type non défini' }}</span>
-                                <span class="ml-2 text-gray-400">|</span>
-                                <span class="ml-2">{{ $project->section ?? 'Section: N/A' }}</span>
-                            </p>
-                            
-                            <div class="text-sm text-gray-700 space-y-1 mt-4">
-                                <p>
-                                    <i class="far fa-calendar-alt text-blue-500 w-5"></i> 
-                                    Début : <span class="font-semibold">{{ $project->start_date ? \Carbon\Carbon::parse($project->start_date)->format('d M Y') : 'N/A' }}</span>
-                                </p>
-                                <p>
-                                    <i class="far fa-calendar-check text-red-500 w-5"></i> 
-                                    Fin Prévue : <span class="font-semibold">{{ $project->end_date ? \Carbon\Carbon::parse($project->end_date)->format('d M Y') : 'N/A' }}</span>
-                                </p>
-                            </div>
-                        </div>
-                    </a>
-                @endforeach
+@foreach ($projects as $project)
+    {{-- Add data attributes for filtering --}}
+    <div class="project-card relative" 
+         data-type="{{ strtolower($project->type ?? '') }}"
+         data-name="{{ strtolower($project->name) }}"
+         data-section="{{ strtolower($project->section ?? '') }}"
+         data-start-date="{{ $project->start_date }}"
+         data-end-date="{{ $project->end_date }}">
+        
+        {{-- Delete button (visible only for agents) --}}
+        @if (Auth::user()->role === 'agent')
+            <button 
+                onclick="event.preventDefault(); openDeleteModal('{{ route('projects.destroy', $project) }}', '{{ $project->name }}')"
+                class="absolute top-4 right-4 z-10 bg-red-600 text-white p-2 rounded-lg hover:bg-red-700 transition duration-150"
+                title="Supprimer le projet"
+            >
+                <i class="fas fa-trash"></i>
+            </button>
+        @endif
+
+        <a href="{{ route('projects.show', $project) }}" class="block">
+            <div class="bg-white p-6 rounded-xl shadow-lg hover:shadow-2xl transition duration-300 transform hover:scale-[1.005] border-l-8 border-gray-400">
+                
+                <h2 class="text-xl font-bold text-gray-800 mb-1 pr-10">
+                    {{ $project->name }}
+                </h2>
+                
+                <p class="text-sm font-medium text-gray-500 mb-3">
+                    <span class="uppercase text-xs tracking-wider bg-indigo-100 text-indigo-800 py-1 px-2 rounded-full">{{ $project->type ?? 'Type non défini' }}</span>
+                    <span class="ml-2 text-gray-400">|</span>
+                    <span class="ml-2">{{ $project->section ?? 'Section: N/A' }}</span>
+                </p>
+                
+                <div class="text-sm text-gray-700 space-y-1 mt-4">
+                    <p>
+                        <i class="far fa-calendar-alt text-blue-500 w-5"></i> 
+                        Début : <span class="font-semibold">{{ $project->start_date ? \Carbon\Carbon::parse($project->start_date)->format('d M Y') : 'N/A' }}</span>
+                    </p>
+                    <p>
+                        <i class="far fa-calendar-check text-red-500 w-5"></i> 
+                        Fin Prévue : <span class="font-semibold">{{ $project->end_date ? \Carbon\Carbon::parse($project->end_date)->format('d M Y') : 'N/A' }}</span>
+                    </p>
+                </div>
+            </div>
+        </a>
+    </div>
+@endforeach
             </div>
         @endif
         
@@ -350,3 +398,15 @@
         });
     </script>
 @endsection
+<script>
+    function openDeleteModal(deleteUrl, projectName) {
+        const modal = document.getElementById('delete-project-modal');
+        const form = document.getElementById('delete-project-form');
+        
+        // Set the form action to the delete URL
+        form.action = deleteUrl;
+        
+        // Show the modal
+        modal.classList.remove('hidden');
+    }
+</script>
