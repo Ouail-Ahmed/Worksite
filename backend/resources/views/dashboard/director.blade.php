@@ -34,10 +34,10 @@
         </div>
 
         <!-- Global Progress Bar (Data from $globalProgress) -->
-        <div class="bg-white p-8 rounded-xl shadow-lg mb-8">
+        {{-- <div class="bg-white p-8 rounded-xl shadow-lg mb-8">
             <h2 class="text-2xl font-semibold text-gray-800 mb-4">
                 Avancement Global (Tous Projets Confondus)
-            </h2>
+            </h2> --}}
             
             @php
                 // Ensure $globalProgress is between 0 and 100 and cast to integer

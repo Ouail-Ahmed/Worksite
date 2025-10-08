@@ -3,9 +3,10 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\ProjectController; // Renamed from ProController
+use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\UnitController;
 use App\Http\Controllers\TaskController;
+use App\Http\Controllers\TaskHistoryController;
 use Illuminate\Support\Facades\Auth;
 
 
@@ -36,51 +37,60 @@ Route::middleware('auth')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
     // Default Landing/Dashboard redirection logic is handled in AuthController@login
-    // We point '/' to the generic dashboard route, which the AuthController@login redirects to after success.
     Route::redirect('/', '/login');
 
     // Default Dashboard (Agent view or redirection logic)
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     // Director/Admin Dashboard (Requires 'director' role via middleware later)
-
     Route::middleware('director')->group(function () {
         // Director/Admin Dashboard
         Route::get('/admin', [DashboardController::class, 'adminIndex'])->name('dashboard.director');
     });
 
-    /* | Unit & Project Management Routes (Web Views)
+    /* |----------------------------------------------------------------------
+    | Web Routes (Views and Form Submissions)
+    |----------------------------------------------------------------------
     */
-
-    // UNITS (Index)
-    Route::get('/units', [UnitController::class, 'index'])->name('units.index');
+    Route::resource('units', UnitController::class);
 
     // List of Projects for a specific Unit
     Route::get('/units/{unit}/projects', [ProjectController::class, 'indexUnitProjects'])->name('units.projects');
-    Route::post('/projects', [ProjectController::class, 'store'])->name('projects.store');
+
     // PROJECTS (Details/Show - The Task Progress View)
+    Route::post('/projects', [ProjectController::class, 'store'])->name('projects.store');
     Route::get('/projects/{project}', [DashboardController::class, 'showProject'])->name('projects.show');
     Route::post('/projects/{project}/tasks', [TaskController::class, 'store'])->name('projects.tasks.store');
+
+    // Task Report Progress (if handled via a standard web form submission)
     Route::put('/tasks/{task}/report-progress', [TaskController::class, 'reportProgress'])->name('tasks.report_progress');
-    // --- API Endpoints (for AJAX/Frontend data) ---
+    Route::get('/tasks/{task}/history', [TaskHistoryController::class, 'index'])->name('tasks.history.index');
+    Route::delete('/tasks/{task}', [TaskController::class, 'destroy'])->name('tasks.destroy');
+
+    /* |----------------------------------------------------------------------
+    | API Endpoints (for AJAX/Frontend data)
+    |----------------------------------------------------------------------
+    */
     Route::prefix('api')->group(function () {
         // Auth check
         Route::get('/user/check', [AuthController::class, 'getAuthenticatedUser']);
 
         // Units API
-        Route::get('/units', [UnitController::class, 'index'])->name('units.index');
+        Route::get('/units', [UnitController::class, 'apiIndex'])->name('api.units.index');
+        Route::post('/units', [UnitController::class, 'apiStore'])->name('api.units.store');
 
-        // Route for handling the form submission (handled by store)
-        Route::post('/units', [UnitController::class, 'store'])->name('units.store');
-
-        // Project Creation/CRUD (Requires Director role)
-        Route::post('/projects', [ProjectController::class, 'store'])->name('api.projects.store');
-        // Project list for sidebar
+        // Project API
+        Route::post('/projects', [ProjectController::class, 'apiStore'])->name('api.projects.store');
         Route::get('/projects/list', [ProjectController::class, 'listProjects']);
-        // Project data for detail view (used by AJAX, though showProject is the main view)
         Route::get('/projects/{project}', [ProjectController::class, 'getProjectData']);
 
-        // Task Update (Daily Progress)
+        // Task Update (Daily Progress handled by API call)
         Route::put('/tasks/{task}', [TaskController::class, 'update'])->name('api.tasks.update');
     });
 });
+
+/*
+|--------------------------------------------------------------------------
+| Additional API Routes
+|--------------------------------------------------------------------------
+*/

@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 // Corresponds to the 'tasks' table
 class Task extends Model
@@ -25,12 +26,12 @@ class Task extends Model
     ];
 
 
-    /**
-     * Get the Project that owns the task (linked via project_id).
-     */
     public function project(): BelongsTo
     {
-        // Relationship method must be named 'project' to match the project_id foreign key
         return $this->belongsTo(Project::class);
+    }
+    public function progressHistory(): HasMany
+    {
+        return $this->hasMany(TaskHistory::class);
     }
 }
