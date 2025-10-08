@@ -16,7 +16,7 @@
                 Projet : <span class="text-blue-600">{{ $project->name }}</span>
             </h1>
             <a href="{{ route('units.projects', $project->unit) }}" class="text-sm font-medium text-gray-500 hover:text-blue-600">
-                <i class="fas fa-arrow-left mr-1"></i> Retour aux projets de l'unité home
+                <i class="fas fa-arrow-left mr-1"></i> Retour aux projets de l'unité
             </a>
         </div>
 
@@ -29,13 +29,13 @@
             </div>
             
             {{-- This section is now updatable via JS --}}
-            <div class="flex-1 text-center">
+            {{-- <div class="flex-1 text-center">
                 <h3 class="text-lg font-bold text-gray-700 mb-2">Avancement Global du Projet</h3>
                 <div class="w-full bg-gray-200 rounded-full h-4">
                     <div id="project-progress-bar" class="bg-green-500 h-4 rounded-full transition-all duration-500" style="width: 0%;"></div>
                 </div>
                 <p id="project-progress-text" class="text-sm text-gray-600 mt-2 font-semibold">Calcul en cours...</p>
-            </div>
+            </div> --}}
         </div>
 
         {{-- Task Header with Add Button --}}
